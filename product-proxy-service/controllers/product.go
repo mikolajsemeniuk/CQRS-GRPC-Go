@@ -4,9 +4,11 @@ import (
 	"net/http"
 
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/services"
+	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/settings"
 )
 
 type Product interface {
+	Index(w http.ResponseWriter, r *http.Request)
 	List(w http.ResponseWriter, r *http.Request)
 	Read(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
@@ -14,7 +16,12 @@ type Product interface {
 }
 
 type product struct {
-	product services.Product
+	configuration settings.Configuration
+	product       services.Product
+}
+
+func (p *product) Index(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (p *product) List(w http.ResponseWriter, r *http.Request) {
@@ -53,8 +60,9 @@ func (p *product) Remove(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func NewProduct(service services.Product) Product {
+func NewProduct(configuration settings.Configuration, service services.Product) Product {
 	return &product{
-		product: service,
+		configuration: configuration,
+		product:       service,
 	}
 }

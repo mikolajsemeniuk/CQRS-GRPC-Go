@@ -1,9 +1,7 @@
 package application
 
 import (
-	"net/http"
-
-	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-validation-service/controllers"
+	"net"
 )
 
 type Server interface {
@@ -13,10 +11,8 @@ type Server interface {
 type server struct{}
 
 func (s server) Run() error {
-	productHandler := controllers.NewProduct()
-	http.HandleFunc("/product", productHandler.List)
-
-	return http.ListenAndServe(":8080", nil)
+	_, err := net.Listen("tcp", "0.0.0.0:50051")
+	return err
 }
 
 func NewServer() Server {
