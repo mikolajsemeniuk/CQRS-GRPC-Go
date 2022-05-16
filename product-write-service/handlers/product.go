@@ -29,6 +29,7 @@ type Product interface {
 
 type product struct {
 	productService services.Product
+	sender         services.Sender
 }
 
 func (p *product) CreateProduct(c context.Context, product *proto.CreateProductRequest) (*emptypb.Empty, error) {
@@ -136,6 +137,11 @@ func (p *product) RemoveProduct(c context.Context, product *proto.RemoveProductR
 		return nil, InvalidIdError
 	}
 
+	err = p.sender.Send("product-import-queue", "hello there")
+	if err != nil {
+		return nil, err
+	}
+
 	err = p.productService.Remove(id.String())
 	if err != nil {
 		return nil, err
@@ -144,8 +150,9 @@ func (p *product) RemoveProduct(c context.Context, product *proto.RemoveProductR
 	return &emptypb.Empty{}, err
 }
 
-func NewProduct(productService services.Product) Product {
+func NewProduct(productService services.Product, sender services.Sender) Product {
 	return &product{
 		productService: productService,
+		sender:         sender,
 	}
 }
