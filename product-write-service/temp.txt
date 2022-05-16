@@ -1,0 +1,75 @@
+// TODO: move to read service
+// func (p product) Read(id string) (messages.Product, error) {
+// 	request := esapi.GetRequest{
+// 		Index:      p.index,
+// 		DocumentID: id,
+// 	}
+
+// 	response, err := request.Do(context.Background(), p.client)
+// 	if err != nil {
+// 		return messages.Product{}, err
+// 	}
+
+// 	if response.StatusCode == 404 {
+// 		return messages.Product{}, ProductNotFoundError
+// 	}
+
+// 	body, err := ioutil.ReadAll(response.Body)
+// 	if err != nil {
+// 		return messages.Product{}, err
+// 	}
+
+// 	var result struct {
+// 		Source messages.Product `json:"_source"`
+// 	}
+// 	if err := json.Unmarshal(body, &result); err != nil {
+// 		return messages.Product{}, err
+// 	}
+
+// 	defer func() {
+// 		err = response.Body.Close()
+// 	}()
+
+// 	return result.Source, err
+// }
+
+
+
+// ListProducts(in *emptypb.Empty, stream proto.ProductService_ListProductsServer) error
+	// ReadProduct(c context.Context, in *proto.ProductId) (*proto.Product, error)
+
+
+// TODO: move to read service
+// func (p *product) ListProducts(in *emptypb.Empty, stream proto.ProductService_ListProductsServer) error {
+// 	for i := 1; i < 4; i++ {
+// 		stream.Send(&proto.Product{
+// 			Id:        "123",
+// 			Name:      "das",
+// 			CreatedAt: timestamppb.Now(),
+// 		})
+// 	}
+// 	return nil
+// }
+
+// func (p *product) ReadProduct(c context.Context, product *proto.ProductId) (*proto.Product, error) {
+// 	_, err := uuid.Parse(product.GetId())
+// 	if err != nil {
+// 		return nil, InvalidIdError
+// 	}
+
+// 	result, err := p.productService.Read(product.GetId())
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &proto.Product{
+// 		Id:         result.Id,
+// 		Name:       result.Name,
+// 		Dollars:    result.Dollars,
+// 		Cents:      result.Cents,
+// 		Amount:     result.Amount,
+// 		IsImported: result.IsImported,
+// 		CreatedAt:  timestamppb.New(result.CreatedAt),
+// 		UpdatedAt:  timestamppb.New(result.UpdatedAt),
+// 	}, nil
+// }

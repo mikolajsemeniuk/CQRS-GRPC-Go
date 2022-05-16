@@ -1,68 +1,52 @@
 package controllers
 
 import (
-	"net/http"
-
+	"github.com/gin-gonic/gin"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/services"
-	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/settings"
 )
 
 type Product interface {
-	Index(w http.ResponseWriter, r *http.Request)
-	List(w http.ResponseWriter, r *http.Request)
-	Read(w http.ResponseWriter, r *http.Request)
-	Update(w http.ResponseWriter, r *http.Request)
-	Remove(w http.ResponseWriter, r *http.Request)
+	List(c *gin.Context)
+	Read(c *gin.Context)
+	Add(c *gin.Context)
+	Update(c *gin.Context)
+	Remove(c *gin.Context)
 }
 
 type product struct {
-	configuration settings.Configuration
-	product       services.Product
+	product services.Product
 }
 
-func (p *product) Index(w http.ResponseWriter, r *http.Request) {
-
+func (p product) List(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "List",
+	})
 }
 
-func (p *product) List(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+func (p product) Read(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Read",
+	})
 }
 
-func (p *product) Read(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+func (p product) Add(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Add",
+	})
 }
 
-func (p *product) Update(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+func (p product) Update(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Update",
+	})
 }
 
-func (p *product) Remove(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
+func (p product) Remove(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "Remove",
+	})
 }
 
-func NewProduct(configuration settings.Configuration, service services.Product) Product {
-	return &product{
-		configuration: configuration,
-		product:       service,
-	}
+func NewProduct() Product {
+	return &product{}
 }

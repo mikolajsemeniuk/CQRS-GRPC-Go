@@ -4,11 +4,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/application"
+	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/applications"
 )
 
 func main() {
-	err := application.NewServer().Run()
+	err := applications.NewServer().Serve()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
