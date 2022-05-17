@@ -25,7 +25,23 @@ type product struct {
 	productService services.Product
 }
 
-func (product) ListProducts(in *emptypb.Empty, stream proto.ProductService_ListProductsServer) error {
+func (p product) ListProducts(in *emptypb.Empty, stream proto.ProductService_ListProductsServer) error {
+	products, err := p.productService.List()
+	if err != nil {
+		return err
+	}
+
+	for _, product := range products {
+		stream.Send(&proto.Product{
+			Id:        product.Id,
+			Name:      *product.Name,
+			Dollars:   *product.Dollars,
+			Cents:     *product.Cents,
+			Amount:    *product.Amount,
+			CreatedAt: timestamppb.New(*product.CreatedAt),
+			UpdatedAt: timestamppb.New(*product.UpdatedAt),
+		})
+	}
 	return nil
 }
 

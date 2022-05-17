@@ -30,8 +30,38 @@ type product struct {
 	client *elasticsearch.Client
 }
 
-func (product) List() ([]messages.Product, error) {
-	return []messages.Product{}, nil
+func (p product) List() ([]messages.Product, error) {
+	products := []messages.Product{}
+
+	response, err := p.client.Search(
+		p.client.Search.WithContext(context.Background()),
+		p.client.Search.WithIndex(p.index),
+	)
+	if err != nil {
+		return products, err
+	}
+
+	var result struct {
+		Hits struct {
+			Hits []struct {
+				Source messages.Product `json:"_source"`
+			} `json:"hits"`
+		} `json:"hits"`
+	}
+
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		return products, err
+	}
+
+	defer func() {
+		err = response.Body.Close()
+	}()
+
+	for _, hit := range result.Hits.Hits {
+		products = append(products, hit.Source)
+	}
+
+	return products, err
 }
 
 func (p product) Read(id string) (messages.Product, error) {
