@@ -10,6 +10,8 @@ require (
 	google.golang.org/protobuf v1.27.1
 )
 
+require github.com/jmespath/go-jmespath v0.4.0 // indirect
+
 require (
 	github.com/aws/aws-sdk-go v1.44.15
 	github.com/elastic/elastic-transport-go/v8 v8.1.0 // indirect
