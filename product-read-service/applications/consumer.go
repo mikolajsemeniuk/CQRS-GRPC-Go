@@ -3,6 +3,7 @@ package applications
 import (
 	"context"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,40 +13,53 @@ import (
 )
 
 type Consumer interface {
-	Consume() error
+	Consume(queue string) error
 }
 
 type consumer struct {
+	group  sync.WaitGroup
 	client *sqs.SQS
+	queue  *string
 }
 
-func (c consumer) Consume() error {
+func (c *consumer) Consume(queue string) error {
+	url, err := c.client.GetQueueUrl(&sqs.GetQueueUrlInput{QueueName: &queue})
+	if err != nil {
+		return err
+	}
+	c.queue = url.QueueUrl
+
 	for {
-		newContext, cancel := context.WithTimeout(context.Background(), time.Second*(20+5))
+		newContext, cancel := context.WithTimeout(context.Background(), time.Second*(20))
 		defer cancel()
 
 		response, err := c.client.ReceiveMessageWithContext(newContext, &sqs.ReceiveMessageInput{
-			QueueUrl:              aws.String("http://localhost:9324/queue/product-import-queue"),
-			MaxNumberOfMessages:   aws.Int64(1),
-			WaitTimeSeconds:       aws.Int64(20),
-			MessageAttributeNames: aws.StringSlice([]string{"All"}),
+			MessageAttributeNames: []*string{aws.String(sqs.QueueAttributeNameAll)},
+			QueueUrl:              c.queue,
+			MaxNumberOfMessages:   aws.Int64(10),
 		})
+
 		if err != nil {
 			return err
 		}
 
-		if len(response.Messages) == 0 {
-			return nil
-		}
-
 		for _, message := range response.Messages {
-			if message != nil {
-				log.Println(string(*message.Body))
-			} else {
-				log.Println("message was nil")
-			}
+			c.group.Add(1)
+			go c.Process(message)
 		}
 	}
+}
+
+func (c consumer) Process(message *sqs.Message) error {
+	defer c.group.Done()
+
+	log.Println(string(*message.Body))
+	_, err := c.client.DeleteMessage(&sqs.DeleteMessageInput{
+		QueueUrl:      c.queue,
+		ReceiptHandle: message.ReceiptHandle,
+	})
+
+	return err
 }
 
 func NewConsumer() Consumer {
@@ -56,7 +70,8 @@ func NewConsumer() Consumer {
 	}
 	AWSSession := session.Must(session.NewSession(AWSConfig))
 
-	return consumer{
+	return &consumer{
+		group:  sync.WaitGroup{},
 		client: sqs.New(AWSSession, AWSConfig),
 	}
 }

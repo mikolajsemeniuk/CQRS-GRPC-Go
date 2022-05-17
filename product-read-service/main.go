@@ -12,7 +12,7 @@ func main() {
 	consumer := applications.NewConsumer()
 
 	go func() {
-		channel <- consumer.Consume()
+		channel <- consumer.Consume("product-import-queue")
 	}()
 
 	err := <-channel

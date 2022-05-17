@@ -5,25 +5,23 @@ services:
     container_name: es-write
     environment:
       - discovery.type=single-node
-      - TAKE_FILE_OWNERSHIP=true
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     ports:
       - 9200:9200
+    deploy:
+      resources:
+        limits:
+          memory: 4GB  # Use at most 50 MB of RAM
   es-read:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
     container_name: es-read
     environment:
       - discovery.type=single-node
-      - TAKE_FILE_OWNERSHIP=true
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
     ports:
       - 9201:9200
+    deploy:
+      resources:
+        limits:
+          memory: 4GB  # Use at most 50 MB of RAM
   sqs:
     image: "roribio16/alpine-sqs:latest"
     container_name: "sqs"
