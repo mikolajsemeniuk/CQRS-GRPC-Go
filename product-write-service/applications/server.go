@@ -19,33 +19,26 @@ type Server interface {
 type server struct{}
 
 func (server) Serve() error {
-	configuration := elasticsearch.Config{
+	AWSConfiguration := &aws.Config{
+		// TODO: move late to configuration
+		Credentials: credentials.AnonymousCredentials,
+		Region:      aws.String("eu-central-1"),
+		Endpoint:    aws.String("http://localhost:9324"),
+	}
+	elasticConfiguration := elasticsearch.Config{
 		Addresses: []string{
 			// TODO: move late to configuration
 			"http://localhost:9200",
 		},
 	}
 
-	elasticClient, err := elasticsearch.NewClient(configuration)
+	elasticClient, err := elasticsearch.NewClient(elasticConfiguration)
 	if err != nil {
 		return err
 	}
 
-	// newSession, err := session.NewSessionWithOptions(session.Options{
-	// 	// TODO: move late to configuration
-	// 	Profile: "default",
-	// 	Config: aws.Config{
-	// 		Region: aws.String("us-west-2"),
-	// 	},
-	// })
-	AWSConfig := &aws.Config{
-		Credentials: credentials.AnonymousCredentials,    //credentials.NewStaticCredentials("AWS_ACCESS_KEY", "AWS_SECRET_KEY", ""),
-		Region:      aws.String("eu-central-1"),          // AWS_REGION
-		Endpoint:    aws.String("http://localhost:9324"), // AWS_SQS_URL
-	}
-
 	productService := services.NewProduct(elasticClient)
-	sender := services.NewSender(AWSConfig)
+	sender := services.NewSender(AWSConfiguration)
 	productHandler := handlers.NewProduct(productService, sender)
 
 	// TODO: move late to configuration

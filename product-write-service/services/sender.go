@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -26,14 +24,14 @@ func (s sender) Send(queue string, message string) error {
 	}
 
 	_, err = client.SendMessage(&sqs.SendMessageInput{
-		QueueUrl:    url.QueueUrl,
-		MessageBody: aws.String(message),
+		QueueUrl:       url.QueueUrl,
+		MessageBody:    aws.String(message),
+		MessageGroupId: aws.String("products"),
 	})
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Message sent successfully")
 	return err
 }
 

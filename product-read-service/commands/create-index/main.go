@@ -22,7 +22,7 @@ func main() {
 
 	elastic, err := elasticsearch.NewClient(elasticsearch.Config{
 		// TODO: move to configuration
-		Addresses: []string{"http://localhost:9200"},
+		Addresses: []string{"http://localhost:9201"},
 	})
 
 	if err != nil {

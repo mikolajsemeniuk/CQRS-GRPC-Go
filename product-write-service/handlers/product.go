@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,31 +33,31 @@ type product struct {
 	sender         services.Sender
 }
 
-func (p *product) CreateProduct(c context.Context, product *proto.CreateProductRequest) (*emptypb.Empty, error) {
-	name := product.GetName()
+func (p *product) CreateProduct(c context.Context, input *proto.CreateProductRequest) (*emptypb.Empty, error) {
+	name := input.GetName()
 	if len(name) < 3 || len(name) > 255 {
 		return nil, InvalidNameError
 	}
 
-	dollars := product.GetDollars()
+	dollars := input.GetDollars()
 	if dollars <= 0 {
 		return nil, InvalidDollarsError
 	}
 
-	cents := product.GetCents()
+	cents := input.GetCents()
 	if cents <= 0 {
 		return nil, InvalidCentsError
 	}
 
-	amount := product.GetAmount()
+	amount := input.GetAmount()
 	if amount <= 0 {
 		return nil, InvalidAmountError
 	}
 
-	imported := product.GetIsImported()
+	imported := input.GetIsImported()
 	created := time.Now()
 
-	message := messages.Product{
+	product := messages.Product{
 		Id:         uuid.New().String(),
 		Name:       &name,
 		Dollars:    &dollars,
@@ -64,9 +65,27 @@ func (p *product) CreateProduct(c context.Context, product *proto.CreateProductR
 		Amount:     &amount,
 		IsImported: &imported,
 		CreatedAt:  &created,
+		UpdatedAt:  &time.Time{},
 	}
 
-	err := p.productService.Create(message)
+	err := p.productService.Create(product)
+	if err != nil {
+		return nil, err
+	}
+
+	event := messages.Event{
+		Method:    "CREATE",
+		Data:      product,
+		Timestamp: time.Now(),
+	}
+
+	bytes, err := json.Marshal(event)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: move to configuration
+	err = p.sender.Send("product-import-queue", string(bytes))
 	if err != nil {
 		return nil, err
 	}
@@ -74,56 +93,73 @@ func (p *product) CreateProduct(c context.Context, product *proto.CreateProductR
 	return &emptypb.Empty{}, err
 }
 
-func (p *product) UpdateProduct(c context.Context, product *proto.UpdateProductRequest) (*emptypb.Empty, error) {
-	id, err := uuid.Parse(product.GetId())
+func (p *product) UpdateProduct(c context.Context, input *proto.UpdateProductRequest) (*emptypb.Empty, error) {
+	id, err := uuid.Parse(input.GetId())
 	if err != nil {
 		return nil, InvalidIdError
 	}
-	message := messages.Product{
+	product := messages.Product{
 		Id: id.String(),
 	}
 
-	name := product.GetName()
+	name := input.GetName()
 	if name != nil && len(name.Value) < 3 || name != nil && len(name.Value) > 255 {
 		return nil, InvalidNameError
 	}
 	if name != nil {
-		message.Name = &name.Value
+		product.Name = &name.Value
 	}
 
-	dollars := product.GetDollars()
+	dollars := input.GetDollars()
 	if dollars != nil && dollars.Value <= 0 {
 		return nil, InvalidDollarsError
 	}
 	if dollars != nil {
-		message.Dollars = &dollars.Value
+		product.Dollars = &dollars.Value
 	}
 
-	cents := product.GetCents()
+	cents := input.GetCents()
 	if cents != nil && cents.Value <= 0 {
 		return nil, InvalidCentsError
 	}
 	if cents != nil {
-		message.Cents = &cents.Value
+		product.Cents = &cents.Value
 	}
 
-	amount := product.GetAmount()
+	amount := input.GetAmount()
 	if amount != nil && amount.Value <= 0 {
 		return nil, InvalidAmountError
 	}
 	if amount != nil {
-		message.Amount = &amount.Value
+		product.Amount = &amount.Value
 	}
 
-	isImported := product.GetIsImported()
+	isImported := input.GetIsImported()
 	if isImported != nil {
-		message.IsImported = &isImported.Value
+		product.IsImported = &isImported.Value
 	}
 
 	updated := time.Now()
-	message.UpdatedAt = &updated
+	product.UpdatedAt = &updated
 
-	err = p.productService.Update(message)
+	err = p.productService.Update(product)
+	if err != nil {
+		return nil, err
+	}
+
+	event := messages.Event{
+		Method:    "UPDATE",
+		Data:      product,
+		Timestamp: time.Now(),
+	}
+
+	bytes, err := json.Marshal(event)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: move to configuration
+	err = p.sender.Send("product-import-queue", string(bytes))
 	if err != nil {
 		return nil, err
 	}
@@ -137,12 +173,24 @@ func (p *product) RemoveProduct(c context.Context, product *proto.RemoveProductR
 		return nil, InvalidIdError
 	}
 
-	err = p.sender.Send("product-import-queue", "hello there")
+	err = p.productService.Remove(id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	err = p.productService.Remove(id.String())
+	event := messages.Event{
+		Method:    "REMOVE",
+		Data:      messages.Product{Id: id.String()},
+		Timestamp: time.Now(),
+	}
+
+	bytes, err := json.Marshal(event)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: move to configuration
+	err = p.sender.Send("product-import-queue", string(bytes))
 	if err != nil {
 		return nil, err
 	}

@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/elastic/go-elasticsearch/esapi"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/messages"
+	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service/messages"
 )
 
 var (
@@ -17,6 +18,8 @@ var (
 )
 
 type Product interface {
+	List() ([]messages.Product, error)
+	Read(id string) (messages.Product, error)
 	Create(product messages.Product) error
 	Update(product messages.Product) error
 	Remove(id string) error
@@ -25,6 +28,44 @@ type Product interface {
 type product struct {
 	index  string
 	client *elasticsearch.Client
+}
+
+func (product) List() ([]messages.Product, error) {
+	return []messages.Product{}, nil
+}
+
+func (p product) Read(id string) (messages.Product, error) {
+	request := esapi.GetRequest{
+		Index:      p.index,
+		DocumentID: id,
+	}
+
+	response, err := request.Do(context.Background(), p.client)
+	if err != nil {
+		return messages.Product{}, err
+	}
+
+	if response.StatusCode == 404 {
+		return messages.Product{}, ProductNotFoundError
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return messages.Product{}, err
+	}
+
+	var result struct {
+		Source messages.Product `json:"_source"`
+	}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return messages.Product{}, err
+	}
+
+	defer func() {
+		err = response.Body.Close()
+	}()
+
+	return result.Source, err
 }
 
 func (p product) Create(product messages.Product) error {

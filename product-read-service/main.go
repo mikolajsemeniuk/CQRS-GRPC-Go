@@ -9,14 +9,18 @@ import (
 
 func main() {
 	channel := make(chan error)
-	consumer := applications.NewConsumer()
+	worker := applications.NewWorker()
+	server := applications.NewServer()
 
 	go func() {
-		channel <- consumer.Consume("product-import-queue")
+		channel <- worker.Work()
 	}()
 
-	err := <-channel
-	if err != nil {
+	go func() {
+		channel <- server.Serve()
+	}()
+
+	if err := <-channel; err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
