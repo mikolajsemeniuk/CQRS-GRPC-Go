@@ -3,12 +3,12 @@ package messages
 import "time"
 
 type Product struct {
-	Id         string    `json:"id"`
-	Name       string    `json:"name"`
-	Dollars    uint64    `json:"dollars"`
-	Cents      uint32    `json:"cents"`
-	Amount     uint32    `json:"amount"`
-	IsImported bool      `json:"is_imported"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at,omitempty"`
+	Id         string    `json:"Id"`
+	Name       string    `json:"Name"`
+	Dollars    uint64    `json:"Dollars"`
+	Cents      uint32    `json:"Cents"`
+	Amount     uint32    `json:"Amount"`
+	IsImported bool      `json:"IsImported"`
+	CreatedAt  time.Time `json:"CreatedAt"`
+	UpdatedAt  time.Time `json:"UpdatedAt,omitempty"`
 }

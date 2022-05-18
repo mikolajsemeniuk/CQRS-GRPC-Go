@@ -8,13 +8,14 @@ import (
 	read "github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service/proto-read"
 	write "github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/proto-write"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type Product interface {
 	List() ([]messages.Product, error)
 	Read(id string) (messages.Product, error)
 	Add(messages.Product) error
-	Update(input messages.Product) error
+	Update(input messages.Update) error
 	Remove(id string) error
 }
 
@@ -39,13 +40,14 @@ func (p *product) List() ([]messages.Product, error) {
 			return products, err
 		}
 		products = append(products, messages.Product{
-			Id:        product.Id,
-			Name:      product.Name,
-			Dollars:   product.Dollars,
-			Cents:     product.Cents,
-			Amount:    product.Amount,
-			CreatedAt: product.CreatedAt.AsTime(),
-			UpdatedAt: product.UpdatedAt.AsTime(),
+			Id:         product.Id,
+			Name:       product.Name,
+			Dollars:    product.Dollars,
+			Cents:      product.Cents,
+			Amount:     product.Amount,
+			IsImported: product.IsImported,
+			CreatedAt:  product.CreatedAt.AsTime(),
+			UpdatedAt:  product.UpdatedAt.AsTime(),
 		})
 	}
 	return products, nil
@@ -60,13 +62,14 @@ func (p product) Read(id string) (messages.Product, error) {
 	}
 
 	return messages.Product{
-		Id:        product.Id,
-		Name:      product.Name,
-		Dollars:   product.Dollars,
-		Cents:     product.Cents,
-		Amount:    product.Amount,
-		CreatedAt: product.CreatedAt.AsTime(),
-		UpdatedAt: product.UpdatedAt.AsTime(),
+		Id:         product.Id,
+		Name:       product.Name,
+		Dollars:    product.Dollars,
+		Cents:      product.Cents,
+		Amount:     product.Amount,
+		IsImported: product.IsImported,
+		CreatedAt:  product.CreatedAt.AsTime(),
+		UpdatedAt:  product.UpdatedAt.AsTime(),
 	}, nil
 }
 
@@ -81,15 +84,30 @@ func (p *product) Add(input messages.Product) error {
 	return err
 }
 
-func (p *product) Update(input messages.Product) error {
-	_, err := p.writeProductServiceClient.UpdateProduct(context.Background(), &write.UpdateProductRequest{
-		// Id:         input.Id,
-		// Name:       input.Name,
-		// Dollars:    input.Dollars,
-		// Cents:      input.Cents,
-		// Amount:     input.Amount,
-		// IsImported: input.IsImported,
-	})
+func (p *product) Update(input messages.Update) error {
+	payload := &write.UpdateProductRequest{Id: input.Id}
+
+	if input.Name != nil {
+		payload.Name = &wrapperspb.StringValue{Value: *input.Name}
+	}
+
+	if input.Dollars != nil {
+		payload.Dollars = &wrapperspb.UInt64Value{Value: *input.Dollars}
+	}
+
+	if input.Cents != nil {
+		payload.Cents = &wrapperspb.UInt32Value{Value: *input.Cents}
+	}
+
+	if input.Amount != nil {
+		payload.Amount = &wrapperspb.UInt32Value{Value: *input.Amount}
+	}
+
+	if input.IsImported != nil {
+		payload.IsImported = &wrapperspb.BoolValue{Value: *input.IsImported}
+	}
+
+	_, err := p.writeProductServiceClient.UpdateProduct(context.Background(), payload)
 	return err
 }
 
