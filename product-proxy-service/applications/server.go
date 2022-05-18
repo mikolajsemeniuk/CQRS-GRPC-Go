@@ -1,8 +1,14 @@
 package applications
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/controllers"
+	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service/services"
+	read "github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service/proto-read"
+	write "github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/proto-write"
+	"google.golang.org/grpc"
 )
 
 type Server interface {
@@ -12,7 +18,21 @@ type Server interface {
 type server struct{}
 
 func (s server) Serve() error {
-	productController := controllers.NewProduct()
+	writeConnection, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("could not connect to server: %v", err)
+	}
+
+	readConnection, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("could not connect to server: %v", err)
+	}
+
+	writeProductServiceClient := write.NewProductServiceClient(writeConnection)
+	readProductServiceClient := read.NewProductServiceClient(readConnection)
+	productService := services.NewProduct(writeProductServiceClient, readProductServiceClient)
+
+	productController := controllers.NewProduct(productService)
 	router := gin.Default()
 
 	// TODO: move to configuration
@@ -26,7 +46,7 @@ func (s server) Serve() error {
 	}
 
 	// TODO: move to configuration
-	err := router.Run(":3000")
+	err = router.Run(":3000")
 	if err != nil {
 		return err
 	}

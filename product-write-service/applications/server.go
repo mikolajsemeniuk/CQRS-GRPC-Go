@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/handlers"
-	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/proto"
+	proto "github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/proto-write"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/services"
 	"google.golang.org/grpc"
 )

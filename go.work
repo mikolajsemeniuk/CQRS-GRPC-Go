@@ -3,6 +3,5 @@ go 1.18
 use (
 	./product-proxy-service
 	./product-read-service
-	./product-validation-service
 	./product-write-service
 )

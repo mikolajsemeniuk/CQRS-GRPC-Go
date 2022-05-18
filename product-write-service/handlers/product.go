@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/messages"
-	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/proto"
+	proto "github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/proto-write"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service/services"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

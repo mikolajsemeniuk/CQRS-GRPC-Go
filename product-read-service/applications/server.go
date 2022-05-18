@@ -5,7 +5,7 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service/handlers"
-	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service/proto"
+	proto "github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service/proto-read"
 	"github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service/services"
 	"google.golang.org/grpc"
 )

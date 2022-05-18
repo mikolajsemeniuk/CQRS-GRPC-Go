@@ -8,7 +8,7 @@ require (
 	github.com/elastic/go-elasticsearch/v8 v8.2.0
 	github.com/google/uuid v1.3.0
 	google.golang.org/grpc v1.46.2
-	google.golang.org/protobuf v1.28.0
+	google.golang.org/protobuf v1.26.1-0.20210525005349-febffdd88e85
 )
 
 require (

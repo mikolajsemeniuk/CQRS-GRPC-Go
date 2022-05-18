@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+package proto;
+option go_package = "./proto";
+
+message Product {
+    string                    Id         = 1;
+    string                    Name       = 2;
+    uint64                    Dollars    = 3;
+    uint32                    Cents      = 4;
+    uint32                    Amount     = 5;
+    bool                      IsImported = 6;
+    google.protobuf.Timestamp CreatedAt  = 7;
+    google.protobuf.Timestamp UpdatedAt  = 8;
+}
+
+message ProductId {
+    string Id = 1;
+}
+
+message CreateProductRequest {
+    string                    Id         = 1;
+    string                    Name       = 2;
+    uint64                    Dollars    = 3;
+    uint32                    Cents      = 4;
+    uint32                    Amount     = 5;
+    bool                      IsImported = 6;
+    google.protobuf.Timestamp CreatedAt  = 7;
+    google.protobuf.Timestamp UpdatedAt  = 8;
+}
+
+message UpdateProductRequest {
+    string                      Id         = 1;
+    google.protobuf.StringValue Name       = 2;
+    google.protobuf.UInt64Value Dollars    = 3;
+    google.protobuf.UInt32Value Cents      = 4;
+    google.protobuf.UInt32Value Amount     = 5;
+    google.protobuf.BoolValue   IsImported = 6;
+    google.protobuf.Timestamp   CreatedAt  = 7;
+    google.protobuf.Timestamp   UpdatedAt  = 8;
+}
+
+message RemoveProductRequest {
+    string Id = 1;
+}
+
+service WriteProductService {
+    rpc CreateProduct (CreateProductRequest) returns (google.protobuf.Empty);
+    rpc UpdateProduct (UpdateProductRequest) returns (google.protobuf.Empty);
+    rpc RemoveProduct (RemoveProductRequest) returns (google.protobuf.Empty);
+}
+
+service ReadProductService {
+    rpc ListProducts (google.protobuf.Empty) returns (stream Product);
+    rpc ReadProduct  (ProductId)             returns (Product); 
+}

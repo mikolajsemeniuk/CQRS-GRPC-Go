@@ -3,8 +3,15 @@ module github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-proxy-service
 go 1.18
 
 require (
+	github.com/gin-gonic/gin v1.7.7
+	github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-read-service v0.0.0-20220517205431-90aeaf4aee87
+	github.com/mikolajsemeniuk/CQRS-GRPC-Go/product-write-service v0.0.0-20220517205431-90aeaf4aee87
+	google.golang.org/grpc v1.46.2
+	google.golang.org/protobuf v1.26.1-0.20210525005349-febffdd88e85
+)
+
+require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.7.7 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
@@ -16,8 +23,9 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220513210258-46612604a0f9 // indirect
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/sys v0.0.0-20220513210249-45d2b4557a2a // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
